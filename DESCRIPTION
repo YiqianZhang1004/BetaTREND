@@ -1,0 +1,27 @@
+Package: BetaTREND
+Type: Package
+Title: Trait-Aligned Gradient Diagnostics and GCO Decomposition for Microbiome Beta Diversity
+Version: 0.1.0
+Authors@R: c(
+  person("Yiqian", "Zhang", email = "zhang.16383@osu.edu", role = c("aut", "cre")),
+  person("Zihan", "Zhu",   email = "zxz1586@case.edu",   role = "aut"))
+Description: Implements a unified toolkit for analysing the relationship between
+    continuous host traits and microbial beta diversity.  Functions include:
+    (i) gradient projection of traits onto PCoA space with publication-quality
+    visualisation; (ii) trustworthiness / continuity / Mantel diagnostics;
+    (iii) CJTT-U trend test with analytic, jackknife and bootstrap variance
+    options plus permutation p-values, with optional double residualisation for
+    confounders; and (iv) G-C-O structural decomposition classifying samples as
+    Gradient-driven, Cluster-driven, or Outliers.  Designed for rapid,
+    reproducible microbiome analyses.
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 3.6)
+Imports:
+    vegan (>= 2.6),
+    ggplot2 (>= 3.4),
+    viridis (>= 0.6)
+URL: https://github.com/YiqianZhang1004/BetaTREND
+BugReports: https://github.com/YiqianZhang1004/BetaTREND/issues
+RoxygenNote: 7.3.2
