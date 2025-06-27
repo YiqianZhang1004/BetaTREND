@@ -1,0 +1,74 @@
+---
+title: "CVD_Case_Study"
+author: "Yiqian"
+date: "2025-06-27"
+output: html_document
+---
+# Source
+```{r}
+load("cardiovascular_wgs.RData")
+#library(devtools)
+#devtools::install_github("YiqianZhang1004/BetaTREND")
+library(BetaTREND)
+library(phyloseq)
+library(vegan)
+```
+
+# Age
+```{r}
+age <- as.numeric(sample_data(ps)[["Age..years."]])
+keep <- !is.na(age)   
+ps_filt <- prune_samples(keep, ps)  
+age_filt <- as.numeric(sample_data(ps_filt)[["Age..years."]] )
+dist_bray_filt <- phyloseq::distance(ps_filt, method = "bray")
+res <- BetaTREND::gradient_projection(dist_bray_filt, age_filt)
+res
+evaluate_consistency_metrics(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores,)
+cjtt_u_test(dist_bray_filt, age_filt, var_method = "analytic")
+# cjtt_u_test(dist_bray_filt, age_filt, var_method = "jackknife") Take too long
+# cjtt_u_test(dist_bray_filt, age_filt, var_method = "bootstrap")
+# cjtt_u_test(dist_bray_filt, age_filt, permutation = T)
+gco_decomposition(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+```
+
+# BMI
+```{r}
+BMI <- as.numeric(sample_data(ps)[["BMI..kg.m.."]])
+keep <- !is.na(BMI)   
+ps_filt <- prune_samples(keep, ps)  
+BMI_filt <- as.numeric(sample_data(ps_filt)[["BMI..kg.m.."]])
+dist_bray_filt <- phyloseq::distance(ps_filt, method = "bray")
+res <- BetaTREND::gradient_projection(dist_bray_filt, BMI_filt)
+res
+evaluate_consistency_metrics(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+cjtt_u_test(dist_bray_filt, BMI_filt, var_method = "analytic")
+gco_decomposition(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+```
+
+# HbA1c
+```{r}
+HbA1c <- as.numeric(sample_data(ps)[["HbA1c...."]])
+keep <- !is.na(HbA1c)   
+ps_filt <- prune_samples(keep, ps)  
+HbA1c_filt <- as.numeric(sample_data(ps_filt)[["HbA1c...."]])
+dist_bray_filt <- phyloseq::distance(ps_filt, method = "bray")
+res <- BetaTREND::gradient_projection(dist_bray_filt, HbA1c_filt)
+res
+evaluate_consistency_metrics(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+cjtt_u_test(dist_bray_filt, HbA1c_filt, var_method = "analytic")
+gco_decomposition(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+```
+
+# CRP
+```{r}
+CRP <- as.numeric(sample_data(ps)[["Fasting.plasma.CRP..mg.L."]])
+keep <- !is.na(CRP)   
+ps_filt <- prune_samples(keep, ps)  
+CRP_filt <- as.numeric(sample_data(ps_filt)[["Fasting.plasma.CRP..mg.L."]])
+dist_bray_filt <- phyloseq::distance(ps_filt, method = "bray")
+res <- BetaTREND::gradient_projection(dist_bray_filt, CRP_filt)
+res
+evaluate_consistency_metrics(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+cjtt_u_test(dist_bray_filt, CRP_filt, var_method = "analytic")
+gco_decomposition(pcoa_mat = res$PCoA_coordinates,projection_scores = res$projection_scores)
+```
