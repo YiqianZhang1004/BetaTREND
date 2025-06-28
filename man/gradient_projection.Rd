@@ -2,55 +2,73 @@
 % Please edit documentation in R/gradient_projection.R
 \name{gradient_projection}
 \alias{gradient_projection}
-\title{Trait-Aligned Gradient Projection in PCoA Space}
+\title{Trait-aligned projection in PCoA space (multiple algorithms)}
 \usage{
-gradient_projection(distance_matrix, trait, ndim = 5, figure = TRUE)
+gradient_projection(
+  distance_matrix,
+  trait,
+  ndim = 5,
+  figure = TRUE,
+  projection = c("orthogonal", "none", "ordered"),
+  lambda = 0
+)
 }
 \arguments{
-\item{distance_matrix}{Either a numeric \code{dist} object or an
-\eqn{n \times n} symmetric distance matrix of community dissimilarities.}
+\item{distance_matrix}{A symmetric distance matrix (class \code{dist} or
+numeric square matrix) of beta diversities.}
 
-\item{trait}{Numeric vector of length \eqn{n} giving the continuous
-phenotype/trait.}
+\item{trait}{Numeric vector of length \eqn{n} with the continuous
+phenotype.}
 
-\item{ndim}{Integer. Number of PCoA axes to retain (default \code{5}).}
+\item{ndim}{Number of PCoA axes retained (default \code{5}).}
 
-\item{figure}{Logical. If \code{TRUE} (default) a ggplot2/viridis figure is
-printed and returned.}
+\item{figure}{Logical; if \code{TRUE} (default) draw a PCoA1–PCoA2
+scatter coloured by the chosen projection or by the trait.}
+
+\item{projection}{Character string: \code{"none"}, \code{"orthogonal"}
+or \code{"ordered"} (see details above).}
+
+\item{lambda}{Optional non-negative LASSO weight used \emph{only}
+when \code{projection = "ordered"}; default \code{0}.}
 }
 \value{
-A list with elements:
-\describe{
-  \item{projection_scores}{Numeric vector of length \eqn{n}; the trait-aligned
-        scores \eqn{\hat y_i = E_i^\top \hat v}.}
-  \item{gradient_direction}{Numeric vector of length \code{ndim}; the
-        direction \eqn{\hat v}.}
-  \item{PCoA_coordinates}{\eqn{n \times ndim} matrix of PCoA scores.}
-  \item{adjusted_R2}{Adjusted \eqn{R^{2}} from the regression
-        \code{trait ~ E}.}
-  \item{p_value}{Global F-test p-value testing trait–embedding association.}
-  \item{plot}{\code{ggplot} object (or \code{NULL} if \code{figure = FALSE}).}
-  \item{variance_explained}{Vector of eigenvalue proportions.}
-}
+A list with the same structure as the original implementation:
+  \describe{
+    \item{\code{projection_scores}}{Length-\eqn{n} vector used for colouring
+          the plot (raw trait if \code{projection = "none"}).}
+    \item{\code{gradient_direction}}{\eqn{\hat\beta}; \code{NA} when
+          \code{projection = "none"}.}
+    \item{\code{PCoA_coordinates}}{\eqn{n \times ndim} matrix of PCoA axes.}
+    \item{\code{adjusted_R2}, \code{p_value}}{Model diagnostics returned only
+          for the orthogonal fit; otherwise \code{NA}.}
+    \item{\code{plot}}{A \pkg{ggplot2} object (or \code{NULL} if
+          \code{figure = FALSE}).}
+    \item{\code{variance_explained}}{Vector of eigenvalue proportions.}
+  }
 }
 \description{
-Compute the 1-D projection of a continuous trait onto a host-community
-PCoA embedding (beta-diversity space), following the formulation
-\eqn{\hat v = (E^\top E)^{-1} E^\top y}.  The function returns
-sample-level projection scores, the gradient direction vector,
-adjusted \eqn{R^{2}}, and (optionally) a publication-quality plot.
+For a given \eqn{n \times n} beta-diversity matrix \eqn{D} and a continuous
+trait vector \eqn{y}, compute a **one-dimensional score**
+\eqn{\hat y = E\hat\beta} from the first \code{ndim} PCoA axes \eqn{E}.
+ 
+The score is used *only* for colouring the PCoA plot; the user can choose
+one of three projection rules:
 }
-\examples{
-\dontrun{
-  library(vegan)
-  set.seed(1)
-  otu   <- matrix(abs(rnorm(100 * 30)), nrow = 100)
-  trait <- rnorm(100)
-  dist_mat <- vegdist(otu, method = "bray")
-
-  res <- gradient_projection(dist_mat, trait)
-  res$plot            # interactive figure
-  res$adjusted_R2
+\details{
+\itemize{
+  \item \strong{none}   — skip projection entirely and colour points by the
+        raw trait.
+  \item \strong{orthogonal}   — ordinary least-squares direction
+        \eqn{\hat\beta = (E^\top E)^{-1}E^\top y}; returns adj.\;R\eqn{^2}
+        and global F-test \eqn{p}.
+  \item \strong{ordered}   — solve
+        \deqn{\min_\beta \|y - E\beta\|_2^2 \quad
+              \text{s.t. } (E_i-E_j)\beta > 0 \text{ if } y_i>y_j,\;
+              (E_i-E_j)\beta = 0 \text{ if } y_i=y_j,}
+        using \pkg{CVXR}.  
+        Constraints are applied only to \emph{consecutive} trait-ordered
+        samples for efficiency.  A non-negative \eqn{\ell_1} penalty
+        (\code{lambda}) can be added to stabilise the solution when
+        \eqn{ndim \gg n}.
 }
-
 }
